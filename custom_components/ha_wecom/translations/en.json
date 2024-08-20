@@ -1,0 +1,15 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "家庭助理【企业微信】",
+        "description": "使用企业微信服务推送消息到微信、使用文本命令控制Home Assistant",
+        "data": {}
+      }
+    },
+    "error": {},
+    "abort": {
+      "single_instance_allowed": "仅允许单个配置."
+    }
+  }
+}

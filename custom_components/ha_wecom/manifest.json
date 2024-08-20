@@ -1,0 +1,16 @@
+{
+  "domain": "ha_wecom",
+  "name": "家庭助理【企业微信】",
+  "version": "2024.8.20",
+  "config_flow": true,
+  "documentation": "https://github.com/shaonianzhentan/ha_wecom",
+  "requirements": [
+    "paho-mqtt>=1.6.1",
+    "pyDes>=2.0.1"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@shaonianzhentan"
+  ],
+  "iot_class": "cloud_push"
+}
