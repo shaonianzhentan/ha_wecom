@@ -1,5 +1,5 @@
 import paho.mqtt.client as mqtt
-import json, time, datetime, logging, re
+import json, time, datetime, logging, re, asyncio
 
 from homeassistant.core import CoreState
 from homeassistant.const import __version__ as current_version
@@ -47,7 +47,7 @@ class HaMqtt():
         self.client.subscribe(self.topic, 2)
         self.is_connected = True
 
-    def unload(self):
+    def close(self):
         self.client.disconnect()
 
     # 清理缓存消息
@@ -119,10 +119,12 @@ class HaMqtt():
 
         if msg_type == 'join':
             # 加入提醒
-            hass.async_create_task(hass.services.async_call('persistent_notification', 'create', {
-                'title': '微信控制',
-                'message': f'{msg_data.get("name")}加入成功'
-            }))
+            self.join_result = {
+                'name': msg_data.get('name'),
+                'ha_version': current_version,
+                'version': manifest.version
+            }
+            self.join_event.set()
             result = {
                 'ha_version': current_version,
                 'version': manifest.version
@@ -149,8 +151,18 @@ class HaMqtt():
                 'data': result
             })
 
+    async def waiting_join(self):
+        self.join_event = asyncio.Event()
+        self.join_result = None
+        while True:
+            if event.is_set():
+                break
+            else:
+                await asyncio.sleep(1)
+        return self.join_result
+
     def call_service(self, service, data={}):
-      arr = service.split('.')      
+      arr = service.split('.')
       self.hass.async_create_task(self.hass.services.async_call(arr[0], arr[1], data))
 
 
