@@ -11,12 +11,12 @@ class WeComSensor(SensorEntity):
 
     def __init__(self, entry, ha_mqtt):
         self._attr_unique_id = entry.entry_id
-        self._attr_name = manifest.name
+        self._attr_name = entry.data['name']
         self._attr_icon = 'mdi:wechat'
         self._attr_device_info = DeviceInfo(
-            name="HomeAssistant家庭助理",
+            name=manifest.name,
             manufacturer='shaonianzhentan',
-            model='ha_wecom',
+            model=manifest.domain,
             configuration_url=manifest.documentation,
             identifiers={(manifest.domain, 'shaonianzhentan')},
         )

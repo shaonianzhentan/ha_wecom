@@ -155,7 +155,7 @@ class HaMqtt():
         self.join_event = asyncio.Event()
         self.join_result = None
         while True:
-            if event.is_set():
+            if self.join_event.is_set():
                 break
             else:
                 await asyncio.sleep(1)
