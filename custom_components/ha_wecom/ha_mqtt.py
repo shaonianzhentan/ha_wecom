@@ -101,9 +101,10 @@ class HaMqtt():
             print(data)
             topic = data['pattern']
             message = self.users[topic].get_message(data['data'])
+            print(message)
             if message is not None:
                 # 消息处理
-                self.hass.async_create_task(self.async_handle_message(topic, message))
+                self.hass.create_task(self.async_handle_message(topic, message))
         except Exception as ex:
             print(ex)
 
@@ -120,6 +121,7 @@ class HaMqtt():
             _LOGGER.debug('断开重连')
             self.client.reconnect()
             self.client.loop_start()
+        print(topic, payload)
         self.client.publish(topic, payload, qos=1)
 
     def publish_server(self, topic, msg_type, msg_data):
@@ -129,7 +131,7 @@ class HaMqtt():
                 'type': msg_type,
                 'data': msg_data
             })
-        self.publish(f'ha_wecom/{topic}', payload, qos=1)
+        self.publish(f'ha_wecom/{topic}', payload)
 
     async def register(self, topic, key):
         self.users[topic] = MqttUser(key)
@@ -144,6 +146,7 @@ class HaMqtt():
         return self.users[topic]
 
     async def async_handle_message(self, topic, data):
+        print(data)
         msg_id = data['id']
         msg_topic = data['topic']
         msg_type = data['type']
@@ -232,9 +235,9 @@ class CJsonEncoder(json.JSONEncoder):
 
 async def register_mqtt(hass, topic, key):
     ''' 注册mqtt服务 '''
-    ha_mqtt = hass.data[DOMAIN]
+    ha_mqtt = hass.data.get(manifest.domain)
     if ha_mqtt is None:
         ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass)
-        hass.data[DOMAIN] = ha_mqtt
+        hass.data[manifest.domain] = ha_mqtt
     await ha_mqtt.register(topic, key)
     return ha_mqtt

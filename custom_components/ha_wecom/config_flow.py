@@ -30,8 +30,6 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
 
         # 等待关联
-        hass = self.hass
-
         ha_mqtt = await register_mqtt(self.hass, topic, key)
         result = await ha_mqtt.waiting_join(topic)
         print(result)

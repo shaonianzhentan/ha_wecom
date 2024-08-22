@@ -5,12 +5,13 @@ from homeassistant.const import Platform
 
 from .manifest import manifest
 from .const import PLATFORMS
+from .ha_mqtt import register_mqtt
 
 DOMAIN = manifest.domain
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     config = entry.data
-    await register_mqtt(self.hass, config['topic'], config['key'])
+    await register_mqtt(hass, config['topic'], config['key'])
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await discovery.async_load_platform(
         hass,

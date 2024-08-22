@@ -33,5 +33,5 @@ class WeComSensor(SensorEntity):
 
     async def async_update(self):
       self._attr_extra_state_attributes = {
-        'receive_time': self.ha_mqtt.msg_time
+        'receive_time': None
       }
