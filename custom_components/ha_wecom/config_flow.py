@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigFlow
 from homeassistant.data_entry_flow import FlowResult
 import uuid
 from .manifest import manifest
-from .ha_mqtt import HaMqtt
+from .ha_mqtt import HaMqtt, register_mqtt
 
 DOMAIN = manifest.domain
 DATA_SCHEMA = vol.Schema({})
@@ -31,15 +31,12 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # 等待关联
         hass = self.hass
-        ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass, {
-            'topic': topic,
-            'key': key
-        })
-        result = await ha_mqtt.waiting_join()
+
+        ha_mqtt = await register_mqtt(self.hass, topic, key)
+        result = await ha_mqtt.waiting_join(topic)
         print(result)
-        ha_mqtt.close()
         return self.async_create_entry(title=DOMAIN, data={
-            'name': result.get('name'),
-            'topic': topic, 
+            'uid': result.get('uid'),
+            'topic': topic,
             'key': key 
         })
