@@ -94,13 +94,11 @@ class HaMqtt():
         self.client.disconnect()
 
     def on_message(self, client, userdata, msg):
+        topic = msg.topic
         payload = str(msg.payload.decode('utf-8'))
         try:
             # 解析消息
-            data = json.loads(payload)
-            print(data)
-            topic = data['pattern']
-            message = self.users[topic].get_message(data['data'])
+            message = self.users[topic].get_message(payload)
             print(message)
             if message is not None:
                 # 消息处理
@@ -203,7 +201,7 @@ class HaMqtt():
             result = { 'speech': text }
 
         if result is not None:
-            return self.get_user(topic).get_payload({
+            return user.get_payload({
                     'id': msg_id,
                     'time': int(time.time()),
                     'type': msg_type,
