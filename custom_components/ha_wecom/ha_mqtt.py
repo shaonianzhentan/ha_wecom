@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import json, time, datetime, logging, re, asyncio, uuid
 
 from homeassistant.components.conversation.agent_manager import async_converse
-from homeassistant.core import CoreState
+from homeassistant.core import CoreState, Context
 from homeassistant.const import __version__ as current_version
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STARTED
@@ -100,7 +100,7 @@ class HaMqtt():
             # 解析消息
             message = self.users[topic].get_message(payload)
             print(message)
-            if message is not None:
+            if message is not None and isinstance(message, dict):
                 # 消息处理
                 self.hass.create_task(self.async_handle_message(topic, message))
         except Exception as ex:
@@ -148,12 +148,13 @@ class HaMqtt():
         msg_id = data['id']
         msg_topic = data['topic']
         msg_type = data['type']
+        user = self.get_user(topic)
 
-        result = await self.async_handle_data(topic, data)
+        result = await self.async_handle_data(user, data)
 
         if result is not None:
             # 加密消息
-            payload = self.get_user(topic).get_payload({
+            payload = user.get_payload({
                 'id': msg_id,
                 'time': int(time.time()),
                 'type': msg_type,
@@ -161,12 +162,10 @@ class HaMqtt():
             })
             self.publish(msg_topic, payload)
 
-    async def async_handle_data(self, topic, data):
+    async def async_handle_data(self, user, data):
         ''' 数据处理 '''
         _LOGGER.debug(data)
-        user = self.get_user(topic)
         hass = self.hass
-        result = None
         msg_type = data['type']
         msg_data = data['data']
 
@@ -176,7 +175,7 @@ class HaMqtt():
             # 加入提醒
             user.join_result = msg_data
             user.join_event.set()
-            result = {
+            return {
                 'ha_version': current_version,
                 'version': manifest.version
             }
@@ -186,27 +185,25 @@ class HaMqtt():
 
             pipeline_data = hass.data['assist_pipeline']
             storage_collection = pipeline_data.pipeline_store
+            pipelines = storage_collection.async_items()
             preferred_pipeline = storage_collection.async_get_preferred_item()
-            print(preferred_pipeline)
-            '''
-            result = await async_converse(
-                hass=hass,
-                text=data["text"],
-                conversation_id=data.get("conversation_id"),
-                context=self.context(request),
-                language=data.get("language"),
-                agent_id=data.get("agent_id", "homeassistant"),
-            )
-            '''
-            result = { 'speech': text }
 
-        if result is not None:
-            return user.get_payload({
-                    'id': msg_id,
-                    'time': int(time.time()),
-                    'type': msg_type,
-                    'data': result
-                })
+            for pipeline in pipelines:
+              if pipeline.id == preferred_pipeline:
+                conversation_result = await async_converse(
+                    hass=hass,
+                    text=text,
+                    context=Context(),
+                    conversation_id=None,
+                    device_id=None,
+                    language=hass.config.language,
+                    agent_id=pipeline.conversation_engine,
+                )
+                intent_response = conversation_result.response
+                speech = intent_response.speech.get('plain')
+                if speech is not None:
+                    result = speech.get('speech')
+                    return { 'speech': result }
 
     async def waiting_join(self, topic):
         user = self.get_user(topic)
