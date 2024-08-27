@@ -11,12 +11,13 @@ class WeComSensor(SensorEntity):
     def __init__(self, entry):
         self._attr_unique_id = entry.entry_id
         uid = entry.data['uid']
+        self.topic = entry.data['topic']
         self._attr_name = uid
         self._attr_icon = 'mdi:wechat'
         self._attr_device_info = DeviceInfo(
             name=uid,
             manufacturer='shaonianzhentan',
-            model=manifest.domain,
+            model='wecom',
             configuration_url=manifest.documentation,
             identifiers={(manifest.domain, 'shaonianzhentan', uid)},
         )
@@ -27,7 +28,7 @@ class WeComSensor(SensorEntity):
       return self.hass.data[manifest.domain]
 
     async def async_update(self):
-      user = self.ha_mqtt.get_user()
+      user = self.ha_mqtt.get_user(self.topic)
       if user.msg_time is not None:
           time_zone = pytz.timezone(self.hass.config.time_zone)
           self._attr_native_value = time_zone.localize(user.msg_time)

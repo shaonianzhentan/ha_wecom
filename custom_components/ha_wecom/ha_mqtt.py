@@ -119,7 +119,6 @@ class HaMqtt():
             _LOGGER.debug('断开重连')
             self.client.reconnect()
             self.client.loop_start()
-        print(topic, payload)
         self.client.publish(topic, payload, qos=1)
 
     def publish_server(self, topic, msg_type, msg_data):
@@ -169,8 +168,6 @@ class HaMqtt():
         msg_type = data['type']
         msg_data = data['data']
 
-        body = msg_data.get('data', {})
-
         if msg_type == 'join':
             # 加入提醒
             user.join_result = msg_data
@@ -179,7 +176,14 @@ class HaMqtt():
                 'ha_version': current_version,
                 'version': manifest.version
             }
-
+        elif msg_type == 'image':
+            url = msg_data['url']
+            return { 'speech': 'HA已成功接收图片' }
+        elif msg_type == 'location':
+            latitude = msg_data['latitude']
+            longitude = msg_data['longitude']
+            precision = msg_data['precision']
+            return { 'speech': '定位成功' }
         elif msg_type == 'conversation':
             text = msg_data['text']
 

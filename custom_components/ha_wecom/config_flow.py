@@ -32,9 +32,9 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
         # 等待关联
         ha_mqtt = await register_mqtt(self.hass, topic, key)
         result = await ha_mqtt.waiting_join(topic)
-        print(result)
-        return self.async_create_entry(title=DOMAIN, data={
-            'uid': result.get('uid'),
+        uid = result.get('uid')
+        return self.async_create_entry(title=uid, data={
+            'uid': uid,
             'topic': topic,
             'key': key 
         })

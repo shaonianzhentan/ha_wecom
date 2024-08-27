@@ -23,5 +23,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data[DOMAIN].remove(entry.data['topic'])
+    await hass.data[DOMAIN].remove(entry.data['topic'])
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
