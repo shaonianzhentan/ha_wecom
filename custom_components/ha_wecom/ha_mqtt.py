@@ -39,8 +39,7 @@ class MqttUser():
         _LOGGER.debug(data)
         self.clear_cache_msg()
 
-        self.msg_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-
+        #self.msg_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())        
         now = int(time.time())
         # 判断消息是否过期(5s)
         if now - 5 > data['time']:
@@ -55,6 +54,7 @@ class MqttUser():
 
         # 设置消息为已接收
         self.msg_cache[msg_id] = now
+        self.msg_time = datetime.datetime.now()
 
         return data
 
