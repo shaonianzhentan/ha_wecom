@@ -33,10 +33,9 @@ class WecomNotificationService(BaseNotificationService):
         """Send a message."""
         data = kwargs.get(ATTR_DATA) or {}
         target = kwargs.get(ATTR_TARGET) or []
-        title = kwargs.get(ATTR_TITLE, message)
+        title = kwargs.get(ATTR_TITLE)
         self.ha_mqtt.publish_server(self.topic, 'push', {
-            'msgtype': 'text',
-            'text': {
-                'content': message
-            }
+            'title': title,
+            'message': message,
+            'data': data
         })
