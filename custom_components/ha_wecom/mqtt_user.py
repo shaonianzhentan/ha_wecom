@@ -5,16 +5,13 @@ _LOGGER = logging.getLogger(__name__)
 
 class MqttUser():
 
-    def __init__(self, key):
+    def __init__(self, topic, key):
+        self.topic = topic
         self.key = key
         self.msg_cache = {}
         self.msg_time = None
         self.join_event = asyncio.Event()
         self.join_result = None
-        self.precision = None
-        self.latitude = None
-        self.longitude = None
-        self.image_url = None
 
     @property
     def encryptor(self):

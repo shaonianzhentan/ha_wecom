@@ -14,9 +14,37 @@ from .mqtt_user import MqttUser
 
 _LOGGER = logging.getLogger(__name__)
 
-class HaMqtt():
+class EventEmit:
+    def __init__(self):
+        self.handlers = {}
+
+    def on(self, name, fn):
+        if name not in self.handlers:
+            self.handlers[name] = []
+        self.handlers[name].append(fn)
+
+    def emit(self, name, data):
+        for fn in self.handlers.get(name, []):
+            fn(data)
+
+    def off(self, name, fn):
+        handlers = self.handlers.get(name)
+        if not handlers:
+            return
+        if fn is None:
+            handlers.clear()
+        else:
+            try:
+                index = handlers.index(fn)
+                if index >= 0:
+                    del handlers[index]
+            except ValueError:
+                pass
+
+class HaMqtt(EventEmit):
 
     def __init__(self, hass):
+        super().__init__()
         self.hass = hass
         self.users = {}
         self.is_connected = False
@@ -84,7 +112,7 @@ class HaMqtt():
         self.publish(f'ha_wecom/{topic}', payload)
 
     async def register(self, topic, key):
-        self.users[topic] = MqttUser(key)
+        self.users[topic] = MqttUser(topic, key)
         if self.is_connected:
             self.client.subscribe(topic, 2)
 
@@ -96,7 +124,6 @@ class HaMqtt():
         return self.users[topic]
 
     async def async_handle_message(self, topic, data):
-        print(data)
         msg_id = data['id']
         msg_topic = data['topic']
         msg_type = data['type']
@@ -130,12 +157,18 @@ class HaMqtt():
                 'version': manifest.version
             }
         elif msg_type == 'image':
-            user.image_url = msg_data['url']
+            self.emit('image', {
+              'topic': user.topic,
+              'url': msg_data['url']
+            })
             return { 'speech': 'HA已成功接收图片' }
-        elif msg_type == 'location':
-            user.latitude = msg_data['latitude']
-            user.longitude = msg_data['longitude']
-            user.precision = msg_data['precision']
+        elif msg_type == 'location':            
+            self.emit('location', {
+              'topic': user.topic,
+              'latitude': float(msg_data['latitude']),
+              'longitude': float(msg_data['longitude']),
+              'precision': float(msg_data['precision'])
+            })
             return { 'speech': '定位成功' }
         elif msg_type == 'conversation':
             text = msg_data['text']

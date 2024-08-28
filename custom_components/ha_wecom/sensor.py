@@ -21,11 +21,16 @@ class WeComSensor(SensorEntity):
     def ha_mqtt(self):
       return self.hass.data[manifest.domain]
 
-    async def async_update(self):
+    def get_data(self):
       user = self.ha_mqtt.get_user(self.topic)
       if user.msg_time is not None:
-          time_zone = pytz.timezone(self.hass.config.time_zone)
-          self._attr_native_value = time_zone.localize(user.msg_time)
+          time_zone =  pytz.timezone(self.hass.config.time_zone)
+          return time_zone.localize(user.msg_time)
+
+    async def async_update(self):
+      data = await self.hass.async_add_executor_job(self.get_data)
+      if data is not None:
+          self._attr_native_value = data
 
       self._attr_extra_state_attributes = {
         'connected': '连接成功' if self.ha_mqtt.is_connected else '断开连接'
