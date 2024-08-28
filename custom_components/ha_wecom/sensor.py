@@ -1,5 +1,5 @@
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.entity import DeviceInfo
+
 import pytz
 from .manifest import manifest
 
@@ -9,18 +9,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class WeComSensor(SensorEntity):
 
     def __init__(self, entry):
-        self._attr_unique_id = entry.entry_id
+        self._attr_unique_id = f'{entry.entry_id}-sensor'
         uid = entry.data['uid']
         self.topic = entry.data['topic']
         self._attr_name = uid
         self._attr_icon = 'mdi:wechat'
-        self._attr_device_info = DeviceInfo(
-            name=uid,
-            manufacturer='shaonianzhentan',
-            model='wecom',
-            configuration_url=manifest.documentation,
-            identifiers={(manifest.domain, 'shaonianzhentan', uid)},
-        )
+        self._attr_device_info = manifest.device_info(uid)
         self._attr_device_class = 'timestamp'
 
     @property

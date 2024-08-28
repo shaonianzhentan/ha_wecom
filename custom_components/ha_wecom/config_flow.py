@@ -27,7 +27,7 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             DATA_SCHEMA = vol.Schema({
               vol.Required("key", default=f'HA:{key}#{topic}'): str
             })
-            return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
+            self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
 
         # 等待关联
         ha_mqtt = await register_mqtt(self.hass, topic, key)

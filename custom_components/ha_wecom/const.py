@@ -1,1 +1,1 @@
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "device_tracker", "image"]

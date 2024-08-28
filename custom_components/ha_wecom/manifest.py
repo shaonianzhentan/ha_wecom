@@ -1,6 +1,6 @@
 import os
 from homeassistant.util.json import load_json
-
+from homeassistant.helpers.entity import DeviceInfo
 CURRENT_PATH = os.path.dirname(__file__)
 
 class Manifest():
@@ -15,5 +15,14 @@ class Manifest():
         self.name = data.get('name')
         self.version = data.get('version')
         self.documentation = data.get('documentation')
+
+    def device_info(self, uid):
+        return DeviceInfo(
+            name=uid,
+            manufacturer='shaonianzhentan',
+            model='wecom',
+            configuration_url=self.documentation,
+            identifiers={(self.domain, 'shaonianzhentan', uid)},
+        )
 
 manifest = Manifest()
