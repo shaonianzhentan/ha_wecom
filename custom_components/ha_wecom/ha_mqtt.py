@@ -156,6 +156,8 @@ class HaMqtt(EventEmit):
                 'ha_version': current_version,
                 'version': manifest.version
             }
+        elif msg_type == 'enter_agent':
+            return { 'speech': 'ok' }
         elif msg_type == 'image':
             self.emit('image', {
               'topic': user.topic,
