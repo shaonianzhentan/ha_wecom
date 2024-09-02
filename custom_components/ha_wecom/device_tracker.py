@@ -12,20 +12,19 @@ class WecomTrackerEntity(TrackerEntity):
         self.hass = hass
         self._attr_unique_id = f'{entry.entry_id}-tracker'
         uid = entry.data['uid']
-        self.topic = entry.data['topic']
+        topic = entry.data['topic']
         self._attr_name = f'{uid}位置'
-        self._attr_device_info = manifest.device_info(uid)
+        self._attr_device_info = manifest.device_info(uid, topic)
         self._attr_location_accuracy = 0
         self._attr_latitude = None
         self._attr_longitude = None
-        self.ha_mqtt.on('location', self.mqtt_location)
+        self.ha_mqtt.on(f'{topic}location', self.mqtt_location)
 
     def mqtt_location(self, data):
-      if data['topic'] == self.topic:
-          self._attr_location_accuracy = data['precision']
-          self._attr_latitude = data['latitude']
-          self._attr_longitude = data['longitude']
-          self.schedule_update_ha_state(True)
+        self._attr_location_accuracy = data['precision']
+        self._attr_latitude = data['latitude']
+        self._attr_longitude = data['longitude']
+        self.schedule_update_ha_state(True)
 
     @property
     def ha_mqtt(self):

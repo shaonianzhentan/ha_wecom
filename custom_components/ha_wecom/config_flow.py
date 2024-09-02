@@ -27,14 +27,21 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             DATA_SCHEMA = vol.Schema({
               vol.Required("key", default=f'HA:{key}#{topic}'): str
             })
-            self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
+            return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
 
         # 等待关联
         ha_mqtt = await register_mqtt(self.hass, topic, key)
         result = await ha_mqtt.waiting_join(topic)
-        uid = result.get('uid')
-        return self.async_create_entry(title=uid, data={
-            'uid': uid,
-            'topic': topic,
-            'key': key 
-        })
+        if result is not None:
+            uid = result.get('uid')
+            return self.async_create_entry(title=uid, data={
+                'uid': uid,
+                'topic': topic,
+                'key': key 
+            })
+        else:
+            return self.async_abort(reason="cancel_join")
+
+    def async_remove(self):
+        print(self.topic)
+        self.hass.create_task(self.hass.data[manifest.domain].waiting_remove(self.topic))

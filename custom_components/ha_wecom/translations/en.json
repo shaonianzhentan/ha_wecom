@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "家庭助理【企业微信】",
-        "description": "使用以下授权码关联企业微信服务",
+        "description": "点击提交按钮后，把以下授权码发送至企业微信服务中，便会自动关联",
         "data": {
           "key": "授权码"
         }
@@ -11,7 +11,7 @@
     },
     "error": {},
     "abort": {
-      "single_instance_allowed": "仅允许单个配置."
+      "cancel_join": "取消企业微信关联"
     }
   }
 }

@@ -16,13 +16,13 @@ class Manifest():
         self.version = data.get('version')
         self.documentation = data.get('documentation')
 
-    def device_info(self, uid):
+    def device_info(self, uid, topic):
         return DeviceInfo(
             name=uid,
             manufacturer='shaonianzhentan',
             model='wecom',
             configuration_url=self.documentation,
-            identifiers={(self.domain, 'shaonianzhentan', uid)},
+            identifiers={('shaonianzhentan', topic, uid)},
         )
 
 manifest = Manifest()

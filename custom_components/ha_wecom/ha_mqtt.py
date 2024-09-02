@@ -80,6 +80,7 @@ class HaMqtt(EventEmit):
         try:
             # 解析消息
             message = self.users[topic].get_message(payload)
+            _LOGGER.debug(message)
             print(message)
             if message is not None and isinstance(message, dict):
                 # 消息处理
@@ -116,19 +117,28 @@ class HaMqtt(EventEmit):
         if self.is_connected:
             self.client.subscribe(topic, 2)
 
-    async def remove(self, topic):
-        del self.users[topic]
+    def remove(self, topic):
         self.client.unsubscribe(topic)
+        if topic in self.users:
+            del self.users[topic]
+        _LOGGER.debug(f'移除订阅 {topic}')
+
+    async def waiting_remove(self, topic):
+        await asyncio.sleep(3)
+        user = self.get_user(topic)
+        if user is not None and user.join_event.is_set() == False:
+            user.join_event.set()
+            await asyncio.sleep(3)
+            self.remove(topic)
 
     def get_user(self, topic) -> MqttUser:
-        return self.users[topic]
+        return self.users.get(topic)
 
     async def async_handle_message(self, topic, data):
         msg_id = data['id']
         msg_topic = data['topic']
         msg_type = data['type']
         user = self.get_user(topic)
-
         result = await self.async_handle_data(user, data)
 
         if result is not None:
@@ -140,6 +150,8 @@ class HaMqtt(EventEmit):
                 'data': result
             })
             self.publish(msg_topic, payload)
+
+        self.emit(f'{topic}message', data)
 
     async def async_handle_data(self, user, data):
         ''' 数据处理 '''
@@ -159,14 +171,12 @@ class HaMqtt(EventEmit):
         elif msg_type == 'enter_agent':
             return { 'speech': 'ok' }
         elif msg_type == 'image':
-            self.emit('image', {
-              'topic': user.topic,
+            self.emit(f'{user.topic}image', {
               'url': msg_data['url']
             })
             return { 'speech': 'HA已成功接收图片' }
         elif msg_type == 'location':            
-            self.emit('location', {
-              'topic': user.topic,
+            self.emit(f'{user.topic}location', {
               'latitude': float(msg_data['latitude']),
               'longitude': float(msg_data['longitude']),
               'precision': float(msg_data['precision'])

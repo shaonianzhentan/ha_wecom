@@ -12,14 +12,13 @@ class WecomImage(ImageEntity):
         self.hass = hass
         self._attr_unique_id = f'{entry.entry_id}-image'
         uid = entry.data['uid']
-        self.topic = entry.data['topic']
+        topic = entry.data['topic']
         self._attr_name = f'{uid}图片'
-        self._attr_device_info = manifest.device_info(uid)
-        self.ha_mqtt.on('image', self.mqtt_image)
+        self._attr_device_info = manifest.device_info(uid, topic)
+        self.ha_mqtt.on(f'{topic}image', self.mqtt_image)
         self._attr_image_url = 'https://www.home-assistant.io/images/favicon-192x192.png'
 
     def mqtt_image(self, data):
-      if data['topic'] == self.topic:
         self._cached_image = None
         self._attr_image_url = data['url']
         self._attr_image_last_updated = datetime.now()
