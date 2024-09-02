@@ -95,14 +95,6 @@ class HaMqtt(EventEmit):
             del self.users[topic]
         _LOGGER.debug(f'移除订阅 {topic}')
 
-    async def waiting_remove(self, topic):
-        await asyncio.sleep(3)
-        user = self.get_user(topic)
-        if user is not None and user.join_event.is_set() == False:
-            user.join_event.set()
-            await asyncio.sleep(3)
-            self.remove(topic)
-
     def get_user(self, topic) -> MqttUser:
         return self.users.get(topic)
 
@@ -180,6 +172,7 @@ class HaMqtt(EventEmit):
                     return { 'speech': result }
 
     async def waiting_join(self, topic):
+        ''' 等待关联 '''
         user = self.get_user(topic)
         while True:
             if user.join_event.is_set():
@@ -187,6 +180,15 @@ class HaMqtt(EventEmit):
             else:
                 await asyncio.sleep(1)
         return user.join_result
+
+    async def cancel_join(self, topic):
+        ''' 取消关联 '''
+        await asyncio.sleep(5)
+        user = self.get_user(topic)
+        if user is not None and user.join_event.is_set() == False and user.join_result is None:
+            user.join_result = None
+            user.join_event.set()
+            self.remove(topic)
 
     def call_service(self, service, data={}):
       arr = service.split('.')
