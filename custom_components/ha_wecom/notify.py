@@ -31,7 +31,6 @@ class WecomNotificationService(BaseNotificationService):
 
     def push(self, msgtype, data):
       result = { 'msgtype': msgtype, msgtype: data }
-      print(result)
       self.ha_mqtt.publish_server(self.topic, 'push', result)
 
     def send_message(self, message, **kwargs):

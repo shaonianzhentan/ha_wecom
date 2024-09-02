@@ -43,5 +43,4 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cancel_join")
 
     def async_remove(self):
-        print(self.topic)
         self.hass.create_task(self.hass.data[manifest.domain].waiting_remove(self.topic))

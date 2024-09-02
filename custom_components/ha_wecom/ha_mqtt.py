@@ -8,38 +8,11 @@ from homeassistant.const import (
     EVENT_HOMEASSISTANT_STARTED
 )
 
-from .EncryptHelper import EncryptHelper
 from .manifest import manifest
 from .mqtt_user import MqttUser
+from .event import EventEmit
 
 _LOGGER = logging.getLogger(__name__)
-
-class EventEmit:
-    def __init__(self):
-        self.handlers = {}
-
-    def on(self, name, fn):
-        if name not in self.handlers:
-            self.handlers[name] = []
-        self.handlers[name].append(fn)
-
-    def emit(self, name, data):
-        for fn in self.handlers.get(name, []):
-            fn(data)
-
-    def off(self, name, fn):
-        handlers = self.handlers.get(name)
-        if not handlers:
-            return
-        if fn is None:
-            handlers.clear()
-        else:
-            try:
-                index = handlers.index(fn)
-                if index >= 0:
-                    del handlers[index]
-            except ValueError:
-                pass
 
 class HaMqtt(EventEmit):
 
@@ -81,7 +54,6 @@ class HaMqtt(EventEmit):
             # 解析消息
             message = self.users[topic].get_message(payload)
             _LOGGER.debug(message)
-            print(message)
             if message is not None and isinstance(message, dict):
                 # 消息处理
                 self.hass.create_task(self.async_handle_message(topic, message))
