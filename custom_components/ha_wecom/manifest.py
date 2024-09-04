@@ -20,7 +20,7 @@ class Manifest():
         return DeviceInfo(
             name=uid,
             manufacturer='shaonianzhentan',
-            model='wecom',
+            model='WeCom',
             configuration_url=self.documentation,
             identifiers={('shaonianzhentan', topic, uid)},
         )

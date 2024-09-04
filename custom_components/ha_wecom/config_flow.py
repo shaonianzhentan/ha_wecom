@@ -19,6 +19,7 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self):      
         self.key = str(uuid.uuid4()).replace('-', '')
         self.topic = str(uuid.uuid1()).replace('-', '')
+        self.is_join = False
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:      
         key = self.key
@@ -33,6 +34,7 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
         ha_mqtt = await register_mqtt(self.hass, topic, key)
         result = await ha_mqtt.waiting_join(topic)
         if result is not None:
+            self.is_join = True
             uid = result.get('uid')
             return self.async_create_entry(title=uid, data={
                 'uid': uid,
@@ -43,4 +45,5 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cancel_join")
 
     def async_remove(self):
-        self.hass.create_task(self.hass.data[manifest.domain].cancel_join(self.topic))
+        if self.is_join == False:
+            self.hass.data[manifest.domain].cancel_join(self.topic)
