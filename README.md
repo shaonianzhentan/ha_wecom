@@ -6,21 +6,27 @@
 
 ### 1. 微信扫码关注
 
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode.png)
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode.png" width="300px" />
 
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/1.jpg)
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/1.jpg" width="300px" />
+
 
 ### 2. 验证身份
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/2.jpg)
 
-# 千万别输入手机号
 
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/3.jpg)
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/2.jpg" width="300px" />
 
-# 随便输入一个错误的邮箱
+# <font color=red>**千万别输入手机号**</font>
 
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/4.jpg)
+
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/3.jpg" width="300px" />
+
+# <font color=red>**邮箱可以随便填**</font>
+
+
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/4.jpg" width="300px" />
 
 ### 3. 输入授权码进行关联
 
-![pic](https://github.com/shaonianzhentan/image/raw/main/ha_wecom/5.jpg)
+
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/5.jpg" width="300px" />
