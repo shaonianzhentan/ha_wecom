@@ -1,8 +1,7 @@
 import paho.mqtt.client as mqtt
 import json, time, datetime, logging, re, asyncio, uuid
 
-from homeassistant.components.conversation.agent_manager import async_converse
-from homeassistant.core import CoreState, Context
+from homeassistant.core import CoreState
 from homeassistant.const import __version__ as current_version
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STARTED
@@ -11,6 +10,7 @@ from homeassistant.const import (
 from .manifest import manifest
 from .mqtt_user import MqttUser
 from .event import EventEmit
+from .assist import async_assistant 
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -139,37 +139,38 @@ class HaMqtt(EventEmit):
               'url': msg_data['url']
             })
             return { 'speech': 'HA已成功接收图片' }
-        elif msg_type == 'location':            
+        elif msg_type == 'voice':
+            self.emit(f'{user.topic}voice', {
+              'url': msg_data['url']
+            })
+            return { 'speech': 'HA已成功接收语音' }
+        elif msg_type == 'video':
+            self.emit(f'{user.topic}video', {
+              'url': msg_data['url']
+            })
+            return { 'speech': 'HA已成功接收视频' }
+        elif msg_type == 'link':
+            self.emit(f'{user.topic}link', {
+              'url': msg_data['url']
+            })
+            return { 'speech': 'HA已成功接收链接' }
+        elif msg_type == 'location':
             self.emit(f'{user.topic}location', {
               'latitude': float(msg_data['latitude']),
               'longitude': float(msg_data['longitude']),
               'precision': float(msg_data['precision'])
             })
             return { 'speech': '定位成功' }
+        elif msg_type == 'text':
+            text = msg_data['text']
+            result = await async_assistant(hass, text)
+            if result is not None:
+                return { 'speech': result }
         elif msg_type == 'conversation':
             text = msg_data['text']
-
-            pipeline_data = hass.data['assist_pipeline']
-            storage_collection = pipeline_data.pipeline_store
-            pipelines = storage_collection.async_items()
-            preferred_pipeline = storage_collection.async_get_preferred_item()
-
-            for pipeline in pipelines:
-              if pipeline.id == preferred_pipeline:
-                conversation_result = await async_converse(
-                    hass=hass,
-                    text=text,
-                    context=Context(),
-                    conversation_id=None,
-                    device_id=None,
-                    language=hass.config.language,
-                    agent_id=pipeline.conversation_engine,
-                )
-                intent_response = conversation_result.response
-                speech = intent_response.speech.get('plain')
-                if speech is not None:
-                    result = speech.get('speech')
-                    return { 'speech': result }
+            result = await async_assistant(hass, text)
+            if result is not None:
+                return { 'speech': result }
 
     async def waiting_join(self, topic):
         ''' 等待关联 '''
