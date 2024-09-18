@@ -12,6 +12,7 @@ class WeComSensor(SensorEntity):
         self.hass = hass
         uid = entry.data['uid']
         topic = entry.data['topic']
+        self._attr_should_poll = False
         self._attr_name = uid
         self._attr_icon = 'mdi:wechat'
         self._attr_device_info = manifest.device_info(uid, topic)
@@ -36,13 +37,11 @@ class WeComSensor(SensorEntity):
           self.msg_data = msg_data['text']
 
         self._attr_native_value = now().replace(tzinfo=get_default_time_zone())
+        self.update_attributes()
+        self.schedule_update_ha_state()
 
     def update_attributes(self):
         self._attr_extra_state_attributes = {
-          'connected': '连接成功' if self.ha_mqtt.is_connected else '断开连接',
           'msg_type': self.msg_type,
           'msg_data': self.msg_data
         }
-
-    async def async_update(self):
-        self.update_attributes()
