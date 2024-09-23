@@ -2,6 +2,11 @@
 
 使用企业微信服务推送消息到微信、使用文本命令控制Home Assistant
 
+[![hacs_badge](https://img.shields.io/badge/Home-Assistant-%23049cdb)](https://www.home-assistant.io/)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+![visit](https://visitor-badge.laobi.icu/badge?page_id=shaonianzhentan.ha_wecom&left_text=visit)
+
+
 ## 功能介绍
 
 - 文本控制
