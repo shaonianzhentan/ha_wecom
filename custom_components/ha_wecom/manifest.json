@@ -1,7 +1,7 @@
 {
   "domain": "ha_wecom",
   "name": "家庭助理【企业微信】",
-  "version": "2024.9.18",
+  "version": "2024.9.19",
   "config_flow": true,
   "documentation": "https://github.com/shaonianzhentan/ha_wecom",
   "requirements": [
