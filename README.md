@@ -6,7 +6,6 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 ![visit](https://visitor-badge.laobi.icu/badge?page_id=shaonianzhentan.ha_wecom&left_text=visit)
 
-
 ## 功能介绍
 
 - 文本控制
@@ -25,7 +24,7 @@ QQ群：`436062579`
 
 ### 1. 微信扫码关注
 
-<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode-9-26.png" width="300px" />
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode-10-4.png" width="300px" />
 
 <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/1.jpg" width="300px" />
 
