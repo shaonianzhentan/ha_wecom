@@ -24,7 +24,7 @@ QQ群：`436062579`
 
 ### 1. 微信扫码关注
 
-<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode-10-4.png" width="300px" />
+<img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/qrcode_10-6.png" width="300px" />
 
 <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wecom/1.jpg" width="300px" />
 
