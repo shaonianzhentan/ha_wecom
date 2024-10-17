@@ -28,7 +28,7 @@ class HaMqtt(EventEmit):
             hass.bus.listen_once(EVENT_HOMEASSISTANT_STARTED, self.connect)
 
     def connect(self, event=None):
-        HOST = 'test.mosquitto.org'
+        HOST = 'broker.emqx.io'
         PORT = 1883
         client = mqtt.Client()        
         self.client = client
