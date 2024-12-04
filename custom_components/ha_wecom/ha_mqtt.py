@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 import json, time, datetime, logging, re, asyncio, uuid
-
+from urllib.parse import urlparse
 from homeassistant.core import CoreState
 from homeassistant.const import __version__ as current_version
 from homeassistant.const import (
@@ -29,10 +29,18 @@ class HaMqtt(EventEmit):
             hass.bus.listen_once(EVENT_HOMEASSISTANT_STARTED, self.connect)
 
     def connect(self, event=None):
+
         HOST = self.host
         PORT = 1883
         client = mqtt.Client()        
         self.client = client
+
+        if HOST.startswith("mqtt://"):
+            parsed_url = urlparse(HOST)
+            HOST = parsed_url.hostname
+            PORT = parsed_url.port
+            client.username_pw_set(parsed_url.username, parsed_url.password)
+
         client.on_connect = self.on_connect
         client.on_message = self.on_message
         client.on_subscribe = self.on_subscribe
