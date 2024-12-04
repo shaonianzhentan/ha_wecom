@@ -3,9 +3,15 @@
     "step": {
       "user": {
         "title": "家庭助理【企业微信】",
-        "description": "点击提交按钮后，把以下授权码发送至企业微信服务中，便会自动关联。",
+        "description": "本插件内置的免费MQTT代理可能不稳定，如需稳定服务请联系我",
         "data": {
-          "host": "MQTT代理",
+          "host": "MQTT代理"
+        }
+      },
+      "link": {
+        "title": "授权关联",
+        "description": "1. 复制生成的“授权码” \n2. 点击提交按钮 \n3. 发送授权码到【HomeAssistant家庭助理】企业微信应用 \n4. 关联成功自动创建实体 \n\n有问题可加QQ群：436062579",
+        "data": {
           "key": "授权码"
         }
       }

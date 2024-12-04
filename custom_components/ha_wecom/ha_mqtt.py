@@ -191,7 +191,7 @@ class HaMqtt(EventEmit):
                 await asyncio.sleep(1)
         return user.join_result
 
-    async def cancel_join(self, topic):
+    def cancel_join(self, topic):
         ''' 取消关联 '''
         user = self.get_user(topic)
         if user is not None:
