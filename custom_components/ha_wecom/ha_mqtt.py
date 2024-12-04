@@ -16,8 +16,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class HaMqtt(EventEmit):
 
-    def __init__(self, hass):
+    def __init__(self, host, hass):
         super().__init__()
+        self.host = host
         self.hass = hass
         self.users = {}
         self.is_connected = False
@@ -28,7 +29,7 @@ class HaMqtt(EventEmit):
             hass.bus.listen_once(EVENT_HOMEASSISTANT_STARTED, self.connect)
 
     def connect(self, event=None):
-        HOST = 'broker.emqx.io'
+        HOST = self.host
         PORT = 1883
         client = mqtt.Client()        
         self.client = client
@@ -195,11 +196,11 @@ class HaMqtt(EventEmit):
       self.hass.async_create_task(self.hass.services.async_call(arr[0], arr[1], data))
 
 
-async def register_mqtt(hass, topic, key):
+async def register_mqtt(hass, host, topic, key):
     ''' 注册mqtt服务 '''
     ha_mqtt = hass.data.get(manifest.domain)
     if ha_mqtt is None:
-        ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass)
+        ha_mqtt = await hass.async_add_executor_job(HaMqtt, host, hass)
         hass.data[manifest.domain] = ha_mqtt
     await ha_mqtt.register(topic, key)
     return ha_mqtt

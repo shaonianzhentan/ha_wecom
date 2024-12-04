@@ -26,12 +26,13 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
         topic = self.topic
         if user_input is None:
             DATA_SCHEMA = vol.Schema({
+              vol.Required("host", default=f'broker.emqx.io'): str,
               vol.Required("key", default=f'HA:{key}#{topic}'): str
             })
             return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
 
         # 等待关联
-        ha_mqtt = await register_mqtt(self.hass, topic, key)
+        ha_mqtt = await register_mqtt(self.hass, user_input.get('host'), topic, key)
         result = await ha_mqtt.waiting_join(topic)
         if result is not None:
             self.is_join = True
