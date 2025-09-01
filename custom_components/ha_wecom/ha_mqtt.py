@@ -16,9 +16,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class HaMqtt(EventEmit):
 
-    def __init__(self, host, hass):
+    def __init__(self, hass):
         super().__init__()
-        self.host = host
+        self.host = 'mqtt://wecom:wecom@jiluxinqing.com:1883'
         self.hass = hass
         self.users = {}
         self.is_connected = False
@@ -204,11 +204,11 @@ class HaMqtt(EventEmit):
       self.hass.async_create_task(self.hass.services.async_call(arr[0], arr[1], data))
 
 
-async def register_mqtt(hass, host, topic, key):
+async def register_mqtt(hass, topic, key):
     ''' 注册mqtt服务 '''
     ha_mqtt = hass.data.get(manifest.domain)
     if ha_mqtt is None:
-        ha_mqtt = await hass.async_add_executor_job(HaMqtt, host, hass)
+        ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass)
         hass.data[manifest.domain] = ha_mqtt
     await ha_mqtt.register(topic, key)
     return ha_mqtt
