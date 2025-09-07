@@ -21,7 +21,7 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
         self.topic = str(uuid.uuid1()).replace('-', '')
         self.is_join = False
 
-    async def async_step_link(self, user_input: dict[str, Any] | None = None) -> FlowResult:      
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:      
         key = self.key
         topic = self.topic
         if user_input is None:
