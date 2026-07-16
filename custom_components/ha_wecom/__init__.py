@@ -23,5 +23,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data[DOMAIN].remove(entry.data['topic'])
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    result = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    ha_mqtt = hass.data.get(DOMAIN)
+    if ha_mqtt is not None:
+        ha_mqtt.remove(entry.data['topic'])
+        # 最后一个条目卸载后释放共享连接，再次添加时由 register_mqtt 重建
+        if not ha_mqtt.users:
+            ha_mqtt.close()
+            hass.data.pop(DOMAIN, None)
+    return result

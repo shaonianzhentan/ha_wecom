@@ -1,5 +1,12 @@
 import paho.mqtt.client as mqtt
 import json, time, datetime, logging, re, asyncio, uuid
+
+# 兼容 paho-mqtt 1.x 与 2.x（2.x 要求显式指定 callback_api_version）
+try:
+    from paho.mqtt.enums import CallbackAPIVersion
+    _CLIENT_KWARGS = {"callback_api_version": CallbackAPIVersion.VERSION1}
+except (ImportError, AttributeError):
+    _CLIENT_KWARGS = {}
 from urllib.parse import urlparse
 from homeassistant.core import CoreState
 from homeassistant.const import __version__ as current_version
@@ -32,7 +39,7 @@ class HaMqtt(EventEmit):
 
         HOST = self.host
         PORT = 1883
-        client = mqtt.Client()        
+        client = mqtt.Client(**_CLIENT_KWARGS)
         self.client = client
 
         if HOST.startswith("mqtt://"):
@@ -54,7 +61,11 @@ class HaMqtt(EventEmit):
         self.is_connected = True
 
     def close(self):
-        self.client.disconnect()
+        if getattr(self, "client", None):
+            try:
+                self.client.disconnect()
+            finally:
+                self.client.loop_stop()
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -66,22 +77,25 @@ class HaMqtt(EventEmit):
             if message is not None and isinstance(message, dict):
                 # 消息处理
                 self.hass.create_task(self.async_handle_message(topic, message))
-        except Exception as ex:
-            print(ex)
+        except Exception:
+            _LOGGER.exception('处理消息异常 topic=%s', topic)
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        print("【ha_mqtt】On Subscribed: qos = %d" % granted_qos)
+        _LOGGER.debug("订阅成功 mid=%s qos=%s", mid, granted_qos)
 
     def on_disconnect(self, client, userdata, rc):
-        print("【ha_mqtt】Unexpected disconnection %s" % rc)
+        _LOGGER.warning("MQTT 连接断开 rc=%s", rc)
         self.is_connected = False
 
     def publish(self, topic, payload):
-        # 判断当前连接状态
-        if self.client._state == 2:
-            _LOGGER.debug('断开重连')
-            self.client.reconnect()
-            self.client.loop_start()
+        # 仅在未连接时重连（_state==2 表示已连接）
+        if self.client._state != 2:
+            _LOGGER.debug('MQTT 未连接，尝试重连')
+            try:
+                self.client.reconnect()
+            except Exception as ex:
+                _LOGGER.error('MQTT 重连失败: %s', ex)
+                return
         self.client.publish(topic, payload, qos=1)
 
     def publish_server(self, topic, msg_type, msg_data):
@@ -181,14 +195,18 @@ class HaMqtt(EventEmit):
             if result is not None:
                 return { 'speech': result }
 
-    async def waiting_join(self, topic):
-        ''' 等待关联 '''
+    async def waiting_join(self, topic, timeout=120):
+        ''' 等待关联（带超时，避免配置流程卡死）'''
         user = self.get_user(topic)
+        elapsed = 0
         while True:
             if user.join_event.is_set():
                 break
-            else:
-                await asyncio.sleep(1)
+            await asyncio.sleep(1)
+            elapsed += 1
+            if elapsed >= timeout:
+                _LOGGER.warning('等待关联超时 topic=%s', topic)
+                return None
         return user.join_result
 
     def cancel_join(self, topic):
@@ -205,10 +223,17 @@ class HaMqtt(EventEmit):
 
 
 async def register_mqtt(hass, topic, key):
-    ''' 注册mqtt服务 '''
+    ''' 注册mqtt服务（单例，避免多条目并发时重复创建连接）'''
     ha_mqtt = hass.data.get(manifest.domain)
     if ha_mqtt is None:
-        ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass)
-        hass.data[manifest.domain] = ha_mqtt
+        new_ha_mqtt = await hass.async_add_executor_job(HaMqtt, hass)
+        # 并发创建时可能已有其它协程先建立，取已存在的实例，避免重复连接
+        ha_mqtt = hass.data.get(manifest.domain)
+        if ha_mqtt is None:
+            hass.data[manifest.domain] = new_ha_mqtt
+            ha_mqtt = new_ha_mqtt
+        else:
+            # 丢弃并发产生的多余连接（停止其后台线程）
+            new_ha_mqtt.close()
     await ha_mqtt.register(topic, key)
     return ha_mqtt

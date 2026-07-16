@@ -20,6 +20,7 @@ class WeComSensor(SensorEntity):
         self.msg_type = None
         self.msg_data = None
         self.ha_mqtt.on(f'{topic}message', self.mqtt_message)
+        self.async_on_remove(lambda: self.ha_mqtt.off(f'{topic}message', self.mqtt_message))
         self.update_attributes()
 
     @property
