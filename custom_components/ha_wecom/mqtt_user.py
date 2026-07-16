@@ -3,6 +3,7 @@ from .EncryptHelper import EncryptHelper
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class MqttUser():
 
     def __init__(self, topic, key):
@@ -32,13 +33,13 @@ class MqttUser():
         now = int(time.time())
         # 判断消息是否过期(5s)
         if now - 5 > data['time']:
-            print('【ha-mqtt】消息已过期')
+            _LOGGER.debug('消息已过期')
             return
 
         msg_id = data['id']
         # 判断消息是否已接收
         if msg_id in self.msg_cache:
-            print('【ha-mqtt】消息已处理')
+            _LOGGER.debug('消息已处理，忽略重复')
             return
 
         # 设置消息为已接收

@@ -16,6 +16,7 @@ class WecomImage(ImageEntity):
         self._attr_name = f'{uid}图片'
         self._attr_device_info = manifest.device_info(uid, topic)
         self.ha_mqtt.on(f'{topic}image', self.mqtt_image)
+        self.async_on_remove(lambda: self.ha_mqtt.off(f'{topic}image', self.mqtt_image))
         self._attr_image_url = 'https://www.home-assistant.io/images/favicon-192x192.png'
 
     def mqtt_image(self, data):

@@ -19,6 +19,7 @@ class WecomTrackerEntity(TrackerEntity):
         self._attr_latitude = None
         self._attr_longitude = None
         self.ha_mqtt.on(f'{topic}location', self.mqtt_location)
+        self.async_on_remove(lambda: self.ha_mqtt.off(f'{topic}location', self.mqtt_location))
 
     def mqtt_location(self, data):
         self._attr_location_accuracy = data['precision']
